@@ -1,4 +1,4 @@
-import { createApi } from '@/lib/api';
+import { api } from '@/lib/api';
 
 export interface TaxiCompany {
   id: string;
@@ -133,7 +133,7 @@ const mockCompanies: TaxiCompany[] = [
     phone: '+352 40 38 40',
     website: 'https://www.beneluxtaxi.lu',
     email: 'info@beneluxtaxi.lu',
-    address: '45, route d'Arlon, L-8009 Strassen',
+    address: "45, route d'Arlon, L-8009 Strassen",
     fleetSize: 55,
     active: true,
     rating: 4.1,
@@ -216,44 +216,43 @@ const generateMockAnalytics = (companyId: string): CompanyAnalytics => {
 };
 
 // Create API endpoints
-export const taxiCompanyService = createApi({
+export const taxiCompanyService = {
   getCompanies: async () => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     return mockCompanies;
   },
 
-  getCompany: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+  getCompanyById: async (id: string) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const company = mockCompanies.find(c => c.id === id);
     if (!company) throw new Error('Company not found');
     return company;
   },
 
-  createCompany: async (data: TaxiCompanyFormData) => {
+  createCompany: async (company: Omit<TaxiCompany, 'id'>) => {
+    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    const newCompany: TaxiCompany = {
-      ...data,
-      id: Math.random().toString(36).substr(2, 9),
+    const newCompany = {
+      ...company,
+      id: Math.random().toString(36).substring(7),
     };
     mockCompanies.push(newCompany);
     return newCompany;
   },
 
-  updateCompany: async (id: string, data: Partial<TaxiCompanyFormData>) => {
+  updateCompany: async (id: string, company: Partial<TaxiCompany>) => {
+    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     const index = mockCompanies.findIndex(c => c.id === id);
     if (index === -1) throw new Error('Company not found');
-    
-    const updatedCompany = {
-      ...mockCompanies[index],
-      ...data,
-    };
-    mockCompanies[index] = updatedCompany;
-    return updatedCompany;
+    mockCompanies[index] = { ...mockCompanies[index], ...company };
+    return mockCompanies[index];
   },
 
   deleteCompany: async (id: string) => {
+    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     const index = mockCompanies.findIndex(c => c.id === id);
     if (index === -1) throw new Error('Company not found');
@@ -264,4 +263,4 @@ export const taxiCompanyService = createApi({
     await new Promise(resolve => setTimeout(resolve, 800));
     return generateMockAnalytics(id);
   },
-});
+};
