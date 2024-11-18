@@ -1,5 +1,18 @@
 import React from 'react';
-import { LayoutDashboard, Users, Car, Settings, HeartHandshake, MessageSquare, DollarSign, Building, Send } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  Car,
+  Settings,
+  HeartHandshake,
+  MessageSquare,
+  DollarSign,
+  Building,
+  Send,
+  BarChart3,
+  FileText,
+  MapPin
+} from 'lucide-react';
 
 interface AdminSidebarProps {
   currentView: string;
@@ -9,7 +22,9 @@ interface AdminSidebarProps {
 export function AdminSidebar({ currentView, setCurrentView }: AdminSidebarProps) {
   const menuItems = [
     { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
-    { id: 'dispatch', icon: Send, label: 'Dispatch Console' },
+    { id: 'analytics', icon: BarChart3, label: 'Analytics' },
+    { id: 'content', icon: FileText, label: 'Content' },
+    { id: 'dispatch', icon: MapPin, label: 'Dispatch Console' },
     { id: 'clients', icon: Users, label: 'Clients' },
     { id: 'drivers', icon: Car, label: 'Drivers' },
     { id: 'companies', icon: Building, label: 'Companies' },

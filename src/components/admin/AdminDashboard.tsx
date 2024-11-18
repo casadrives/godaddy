@@ -10,6 +10,8 @@ import { FinanceDashboard } from './finance/FinanceDashboard';
 import { ClientsPanel } from './ClientsPanel';
 import { CompanyPanel } from './CompanyPanel';
 import { DispatchConsole } from '../dispatch/DispatchConsole';
+import { AnalyticsDashboard } from './analytics/AnalyticsDashboard';
+import { ContentDashboard } from './content/ContentDashboard';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
@@ -56,33 +58,32 @@ export function AdminDashboard() {
   };
 
   const renderView = () => {
-    const views = {
-      overview: <AdminOverview suspendedCompanies={suspendedCompanies} />,
-      clients: <ClientsPanel />,
-      drivers: <DriversManagement />,
-      rides: <RidesManagement />,
-      finance: <FinanceDashboard />,
-      companies: <CompanyPanel />,
-      support: <SupportDashboard />,
-      settings: <Settings />,
-      dispatch: <DispatchConsole />
-    };
-
-    return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentView}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          variants={pageVariants}
-          transition={{ type: "spring", stiffness: 100 }}
-          className="h-full"
-        >
-          {views[currentView as keyof typeof views]}
-        </motion.div>
-      </AnimatePresence>
-    );
+    switch (currentView) {
+      case 'overview':
+        return <AdminOverview suspendedCompanies={suspendedCompanies} />;
+      case 'drivers':
+        return <DriversManagement />;
+      case 'rides':
+        return <RidesManagement />;
+      case 'finance':
+        return <FinanceDashboard />;
+      case 'clients':
+        return <ClientsPanel />;
+      case 'companies':
+        return <CompanyPanel />;
+      case 'support':
+        return <SupportDashboard />;
+      case 'settings':
+        return <Settings />;
+      case 'dispatch':
+        return <DispatchConsole />;
+      case 'analytics':
+        return <AnalyticsDashboard />;
+      case 'content':
+        return <ContentDashboard />;
+      default:
+        return <AdminOverview suspendedCompanies={suspendedCompanies} />;
+    }
   };
 
   if (!user) {
