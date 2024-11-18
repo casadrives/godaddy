@@ -13,6 +13,20 @@ export function Hero({ onBookRide }: HeroProps) {
     window.location.href = 'tel:+352112';
   };
 
+  const handleLearnMore = () => {
+    document.getElementById('about')?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  const handleDownloadApp = () => {
+    document.getElementById('download-app')?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
   return (
     <div id="hero" className="relative">
       <div className="absolute inset-0 z-0">
@@ -36,26 +50,35 @@ export function Hero({ onBookRide }: HeroProps) {
             <button 
               onClick={onBookRide}
               className="group bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center"
+              aria-label="Book a Ride"
             >
               {t('hero.bookRide')}
               <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
             </button>
             <button 
-              onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={handleLearnMore}
               className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all duration-300"
+              aria-label="Learn More About Our Services"
             >
               Learn More
+            </button>
+            <button 
+              onClick={handleDownloadApp}
+              className="bg-green-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center"
+              aria-label="Download Our Mobile App"
+            >
+              Download App
             </button>
           </div>
 
           {/* Emergency Call Button */}
           <button
             onClick={handleEmergencyCall}
-            className="mt-6 inline-flex items-center text-white/80 hover:text-white transition-colors"
+            className="mt-6 inline-flex items-center text-white/80 hover:text-white transition-colors group"
             aria-label="Emergency Call"
           >
-            <PhoneCall className="h-5 w-5 mr-2" />
-            <span>Emergency? Call Now</span>
+            <PhoneCall className="h-5 w-5 mr-2 group-hover:animate-pulse" />
+            <span className="group-hover:underline">Emergency? Call Now</span>
           </button>
         </div>
       </div>

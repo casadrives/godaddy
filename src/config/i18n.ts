@@ -18,9 +18,15 @@ export const TRANSLATIONS = {
       loading: 'Loading...',
       error: 'An error occurred',
       success: 'Success',
+      trial: 'Trial',
+      active: 'Active',
+      inactive: 'Inactive',
+      pending: 'Pending',
     },
     payment: {
       methods: {
+        paypal: 'PayPal',
+        sumup: 'SumUp',
         card: 'Credit/Debit Card',
         sepa: 'SEPA Direct Debit',
         digicash: 'Digicash',
@@ -32,16 +38,43 @@ export const TRANSLATIONS = {
         title: 'Driver Subscription',
         monthlyFee: 'Monthly Fee',
         nextPayment: 'Next Payment',
+        trialPeriod: 'Trial Period',
+        daysRemaining: '{days} days remaining',
+        trialEnding: 'Trial ending soon!',
+        setupPayment: 'Set Up Payment for After Trial',
+        payNow: 'Pay Monthly Subscription',
+        features: {
+          title: 'Subscription Includes',
+          unlimitedRides: 'Unlimited ride requests',
+          prioritySupport: 'Priority customer support',
+          realTimeTracking: 'Real-time earnings tracking',
+          professionalProfile: 'Professional driver profile',
+        },
         status: {
           active: 'Active',
           inactive: 'Inactive',
           pending: 'Pending',
+          trial: 'Trial Active',
         },
       },
       commission: {
         title: 'Commission',
         rate: 'Commission Rate',
         earnings: 'Your Earnings',
+      },
+    },
+    company: {
+      subscription: {
+        title: 'Company Subscription',
+        perTaxi: '€{amount} per taxi',
+        totalMonthly: 'Total Monthly: €{amount}',
+        features: {
+          title: 'Company Features',
+          multiTaxi: 'Multiple taxi management',
+          dashboard: 'Company dashboard',
+          analytics: 'Fleet analytics',
+          support: 'Priority support',
+        },
       },
     },
     onboarding: {
@@ -83,9 +116,15 @@ export const TRANSLATIONS = {
       loading: 'Chargement...',
       error: 'Une erreur est survenue',
       success: 'Succès',
+      trial: 'Essai',
+      active: 'Actif',
+      inactive: 'Inactif',
+      pending: 'En attente',
     },
     payment: {
       methods: {
+        paypal: 'PayPal',
+        sumup: 'SumUp',
         card: 'Carte de crédit/débit',
         sepa: 'Prélèvement SEPA',
         digicash: 'Digicash',
@@ -97,16 +136,43 @@ export const TRANSLATIONS = {
         title: 'Abonnement Chauffeur',
         monthlyFee: 'Frais Mensuel',
         nextPayment: 'Prochain Paiement',
+        trialPeriod: 'Période d\'essai',
+        daysRemaining: '{days} jours restants',
+        trialEnding: 'Période d\'essai se termine bientôt !',
+        setupPayment: 'Configurer le paiement pour après l\'essai',
+        payNow: 'Payer l\'abonnement mensuel',
+        features: {
+          title: 'L\'abonnement inclut',
+          unlimitedRides: 'Demandes de courses illimitées',
+          prioritySupport: 'Support client prioritaire',
+          realTimeTracking: 'Suivi des gains en temps réel',
+          professionalProfile: 'Profil professionnel',
+        },
         status: {
           active: 'Actif',
           inactive: 'Inactif',
           pending: 'En attente',
+          trial: 'Essai Actif',
         },
       },
       commission: {
         title: 'Commission',
         rate: 'Taux de Commission',
         earnings: 'Vos Gains',
+      },
+    },
+    company: {
+      subscription: {
+        title: 'Abonnement Entreprise',
+        perTaxi: '€{amount} par taxi',
+        totalMonthly: 'Total Mensuel : €{amount}',
+        features: {
+          title: 'Fonctionnalités Entreprise',
+          multiTaxi: 'Gestion multi-taxis',
+          dashboard: 'Tableau de bord entreprise',
+          analytics: 'Analyses de flotte',
+          support: 'Support prioritaire',
+        },
       },
     },
     onboarding: {
@@ -141,7 +207,6 @@ export const TRANSLATIONS = {
     },
   },
   de: {
-    // German translations...
     common: {
       save: 'Speichern',
       cancel: 'Abbrechen',
@@ -149,9 +214,15 @@ export const TRANSLATIONS = {
       loading: 'Laden...',
       error: 'Ein Fehler ist aufgetreten',
       success: 'Erfolg',
+      trial: 'Testphase',
+      active: 'Aktiv',
+      inactive: 'Inaktiv',
+      pending: 'Ausstehend',
     },
     payment: {
       methods: {
+        paypal: 'PayPal',
+        sumup: 'SumUp',
         card: 'Kredit/Debitkarte',
         sepa: 'SEPA-Lastschrift',
         digicash: 'Digicash',
@@ -163,16 +234,43 @@ export const TRANSLATIONS = {
         title: 'Fahrer-Abonnement',
         monthlyFee: 'Monatliche Gebühr',
         nextPayment: 'Nächste Zahlung',
+        trialPeriod: 'Testphase',
+        daysRemaining: '{days} Tage verbleibend',
+        trialEnding: 'Testphase endet bald!',
+        setupPayment: 'Zahlung für nach der Testphase einrichten',
+        payNow: 'Monatliches Abonnement bezahlen',
+        features: {
+          title: 'Abonnement beinhaltet',
+          unlimitedRides: 'Unbegrenzte Fahrtanfragen',
+          prioritySupport: 'Prioritäts-Kundenservice',
+          realTimeTracking: 'Echtzeit-Einnahmenverfolgung',
+          professionalProfile: 'Professionelles Fahrerprofil',
+        },
         status: {
           active: 'Aktiv',
           inactive: 'Inaktiv',
           pending: 'Ausstehend',
+          trial: 'Testphase Aktiv',
         },
       },
       commission: {
         title: 'Provision',
         rate: 'Provisionssatz',
         earnings: 'Ihre Einnahmen',
+      },
+    },
+    company: {
+      subscription: {
+        title: 'Unternehmens-Abonnement',
+        perTaxi: '€{amount} pro Taxi',
+        totalMonthly: 'Monatlich Gesamt: €{amount}',
+        features: {
+          title: 'Unternehmens-Funktionen',
+          multiTaxi: 'Mehrfach-Taxi-Verwaltung',
+          dashboard: 'Unternehmens-Dashboard',
+          analytics: 'Flottenanalyse',
+          support: 'Prioritäts-Support',
+        },
       },
     },
     onboarding: {
@@ -207,7 +305,6 @@ export const TRANSLATIONS = {
     },
   },
   lb: {
-    // Luxembourgish translations...
     common: {
       save: 'Späicheren',
       cancel: 'Ofbriechen',
@@ -215,9 +312,15 @@ export const TRANSLATIONS = {
       loading: 'Lueden...',
       error: 'E Feeler ass opgetrueden',
       success: 'Erfolleg',
+      trial: 'Testphas',
+      active: 'Aktiv',
+      inactive: 'Inaktiv',
+      pending: 'An der Waart',
     },
     payment: {
       methods: {
+        paypal: 'PayPal',
+        sumup: 'SumUp',
         card: 'Kredit/Debitkaart',
         sepa: 'SEPA-Lastschrëft',
         digicash: 'Digicash',
@@ -229,16 +332,43 @@ export const TRANSLATIONS = {
         title: 'Chauffer-Abonnement',
         monthlyFee: 'Méintlech Käschten',
         nextPayment: 'Nächst Bezuelung',
+        trialPeriod: 'Testphas',
+        daysRemaining: '{days} Deeg iwwreg',
+        trialEnding: 'Testphas geet geschwënn op en Enn!',
+        setupPayment: 'Bezuelung fir no der Testphas ariichten',
+        payNow: 'Méintlecht Abonnement bezuelen',
+        features: {
+          title: 'Abonnement enthält',
+          unlimitedRides: 'Onlimitéiert Fueren-Ufroen',
+          prioritySupport: 'Prioritéit Clientsservice',
+          realTimeTracking: 'Echtzäit-Verdéngscht-Tracking',
+          professionalProfile: 'Professionelle Chauffer-Profil',
+        },
         status: {
           active: 'Aktiv',
           inactive: 'Inaktiv',
           pending: 'An der Waart',
+          trial: 'Testphas Aktiv',
         },
       },
       commission: {
         title: 'Kommissioun',
         rate: 'Kommissiounssaz',
         earnings: 'Är Akommes',
+      },
+    },
+    company: {
+      subscription: {
+        title: 'Betrib-Abonnement',
+        perTaxi: '€{amount} pro Taxi',
+        totalMonthly: 'Total pro Mount: €{amount}',
+        features: {
+          title: 'Betrib-Funktiounen',
+          multiTaxi: 'Multi-Taxi Verwaltung',
+          dashboard: 'Betrib-Dashboard',
+          analytics: 'Flott-Analysen',
+          support: 'Prioritéit Support',
+        },
       },
     },
     onboarding: {
