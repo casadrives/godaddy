@@ -27,40 +27,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo accounts
-const demoAccounts = {
-  'admin@casadrives.com': {
-    id: 'admin-1',
-    name: 'Admin User',
-    email: 'admin@casadrives.com',
-    role: 'admin' as const,
-    status: 'approved' as const,
-    password: 'demo123',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-  },
-  'company@demo.com': {
-    id: 'demo-company',
-    name: 'Demo Company',
-    email: 'company@demo.com',
-    role: 'company' as const,
-    status: 'approved' as const,
-    password: 'demo123',
-  },
-  'driver@demo.com': {
-    id: 'demo-driver',
-    name: 'Demo Driver',
-    email: 'driver@demo.com',
-    role: 'driver' as const,
-    status: 'approved' as const,
-    password: 'demo123',
-  },
-  'client@demo.com': {
-    id: 'demo-client',
-    name: 'Demo Client',
-    email: 'client@demo.com',
-    role: 'user' as const,
-    password: 'demo123',
-  },
+// Initial admin account
+const adminAccount = {
+  id: 'admin-1',
+  name: 'Super Admin',
+  email: 'admin@casadrives.lu',
+  role: 'admin' as const,
+  status: 'approved' as const,
+  password: 'Admin@2024!',
+  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -78,13 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const demoUser = demoAccounts[email as keyof typeof demoAccounts];
-      
-      if (!demoUser || demoUser.password !== password) {
+      // Only allow admin login for now
+      if (email !== adminAccount.email || password !== adminAccount.password) {
         throw new Error('Invalid credentials');
       }
 
-      const { password: _, ...userWithoutPassword } = demoUser;
+      const { password: _, ...userWithoutPassword } = adminAccount;
       setUser(userWithoutPassword);
       localStorage.setItem('casadriveUser', JSON.stringify(userWithoutPassword));
     } catch (err) {
@@ -101,67 +75,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (userData: { name: string; email: string; password: string; role?: string; companyId?: string }) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: 'new-user',
-        name: userData.name,
-        email: userData.email,
-        role: (userData.role as User['role']) || 'user',
-        companyId: userData.companyId
-      };
-
-      setUser(mockUser);
-      localStorage.setItem('casadriveUser', JSON.stringify(mockUser));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    setError('Registration is currently disabled');
+    throw new Error('Registration is currently disabled');
   };
 
   const registerCompany = async (companyData: { name: string; email: string; password: string; phone: string; registrationNumber: string; taxiLicense: string; fleetSize: string }) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { status: 'pending' };
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Company registration failed');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    setError('Company registration is currently disabled');
+    throw new Error('Company registration is currently disabled');
   };
 
   const registerDriver = async (driverData: { name: string; email: string; password: string; companyId: string }) => {
-    return register({
-      ...driverData,
-      role: 'driver'
-    });
+    setError('Driver registration is currently disabled');
+    throw new Error('Driver registration is currently disabled');
   };
 
   const checkPaymentStatus = async () => {
-    if (user?.role === 'company' && user.paymentDue) {
-      const now = new Date();
-      const paymentDue = new Date(user.paymentDue);
-      
-      if (now > paymentDue) {
-        const updatedUser = {
-          ...user,
-          status: 'suspended' as const
-        };
-        setUser(updatedUser);
-        localStorage.setItem('casadriveUser', JSON.stringify(updatedUser));
-        throw new Error('Account suspended due to missed payment');
-      }
-    }
+    // Payment status check is disabled
   };
 
   return (
