@@ -3,10 +3,37 @@ import { createRoot } from 'react-dom/client';
 import { App } from '@capacitor/app';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar } from '@capacitor/status-bar';
+import * as Sentry from "@sentry/react";
+import { ThemeProvider } from 'next-themes';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
 import AppComponent from './App';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import './index.css';
+
+// Initialize Sentry
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [
+    new Sentry.BrowserTracing(),
+    new Sentry.Replay()
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
+
+// Create Query Client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 2,
+      refetchOnWindowFocus: false
+    }
+  }
+});
 
 // Initialize Capacitor plugins with proper error handling
 const initializeApp = async () => {
@@ -32,24 +59,36 @@ const initializeApp = async () => {
       });
     }
   } catch (error) {
-    // Log error but don't prevent app from loading
     console.warn('Capacitor initialization skipped:', error);
+    Sentry.captureException(error);
   }
 };
 
 // Initialize app
-initializeApp().catch(console.warn);
+initializeApp().catch((error) => {
+  console.error('App initialization failed:', error);
+  Sentry.captureException(error);
+});
 
 const root = document.getElementById('root');
 
-if (root) {
-  createRoot(root).render(
-    <StrictMode>
-      <AuthProvider>
-        <AppProvider>
-          <AppComponent />
-        </AppProvider>
-      </AuthProvider>
-    </StrictMode>
-  );
+if (!root) {
+  throw new Error('Root element not found');
 }
+
+createRoot(root).render(
+  <StrictMode>
+    <Sentry.ErrorBoundary fallback={<div>An error has occurred</div>}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>
+            <AppProvider>
+              <AppComponent />
+              <Toaster position="top-right" expand={true} richColors />
+            </AppProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </Sentry.ErrorBoundary>
+  </StrictMode>
+);

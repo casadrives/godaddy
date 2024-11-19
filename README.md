@@ -1,137 +1,132 @@
-# Luxembourg Taxi Platform 
+# CasaDrives - Luxembourg's Premier Taxi Platform
 
 A modern, feature-rich taxi booking platform built specifically for Luxembourg's transportation market. This platform provides a seamless experience for booking and tracking taxi rides across Luxembourg.
 
-[Edit in StackBlitz next generation editor ](https://stackblitz.com/~/github.com/casadrives/godaddy)
-
-## Features
+## 🚀 Features
 
 - **Real-time Ride Booking**
   - Instant driver matching
   - Dynamic surge pricing
-  - Multiple payment methods (Card/Cash)
+  - Multiple payment methods
   - Scheduled rides
-  - Special instructions for drivers
+  - Special instructions
   - Passenger count selection
 
 - **Live Tracking**
   - Real-time driver location
   - Estimated arrival time
   - Route visualization
-  - Driver details and vehicle information
+  - Driver details
 
 - **Admin Dashboard**
-  - Secure authentication system
-  - Ride management
-  - Driver oversight
+  - User management
+  - Driver management
+  - Company management
   - Analytics and reporting
+  - Payment processing
 
-## Getting Started
+## 🛠️ Tech Stack
 
-### Prerequisites
+- **Frontend**: React + TypeScript + Vite
+- **UI Components**: Radix UI + Tailwind CSS
+- **State Management**: Zustand + React Query
+- **Maps**: Mapbox GL
+- **Backend**: Supabase
+- **Authentication**: Supabase Auth
+- **Database**: PostgreSQL (via Supabase)
+- **Analytics**: Sentry + Custom Analytics
+- **Payments**: Stripe
 
-- Node.js >= 18.0.0
-- npm or yarn
-- Git
-
-### Installation
+## 📦 Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/luxembourg-taxi-platform.git
-cd luxembourg-taxi-platform
-```
+   ```bash
+   git clone https://github.com/casadrives/godaddy.git
+   cd godaddy
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
+   ```bash
+   npm install
+   ```
 
-3. Set up environment variables:
-Create a `.env` file in the root directory and add:
-```env
-VITE_MAPBOX_TOKEN=your_mapbox_token_here
-```
+3. Create a `.env` file:
+   ```bash
+   cp .env.example .env
+   ```
 
-4. Start the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
+4. Update environment variables in `.env`
 
-The application will be available at `http://localhost:5173`
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Tech Stack
+## 🔧 Configuration
 
-- **Frontend**
-  - React 18
-  - TypeScript
-  - Tailwind CSS
-  - RxJS
-  - Lucide Icons
-  - MapBox
+### Environment Variables
 
-- **State Management**
-  - RxJS BehaviorSubject
-  - React Context
+Copy `.env.example` to `.env` and update the following variables:
 
-- **Authentication**
-  - Custom JWT implementation
-  - Secure session management
+- `VITE_SUPABASE_URL`: Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `VITE_MAPBOX_TOKEN`: Your Mapbox access token
+- `VITE_STRIPE_PUBLIC_KEY`: Your Stripe public key
+- `VITE_SENTRY_DSN`: Your Sentry DSN
 
-## Key Components
+## 🚀 Deployment
 
-- `BookRide`: Main ride booking interface
-- `DriverTrackingModal`: Real-time driver tracking
-- `AdminDashboard`: Administrative control panel
-- `AdminLogin`: Secure admin authentication
+1. Build the project:
+   ```bash
+   npm run build
+   ```
 
-## Security Features
+2. Preview the build:
+   ```bash
+   npm run preview
+   ```
 
-- Secure admin authentication
-- Password hashing
-- Session management
-- Protected routes
-- Input validation
+3. Deploy to your hosting service of choice (e.g., Netlify, Vercel)
 
-## Localization
+## 🧪 Testing
 
-Currently supports:
-- English
-- French
-- German
-- Luxembourgish
+- Run unit tests:
+  ```bash
+  npm test
+  ```
 
-## Contributing
+- Run E2E tests:
+  ```bash
+  npm run test:e2e
+  ```
+
+- Run tests with coverage:
+  ```bash
+  npm run test:coverage
+  ```
+
+## 📚 Documentation
+
+For detailed documentation, please visit our [Wiki](https://github.com/casadrives/godaddy/wiki).
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
 5. Open a Pull Request
 
-## Default Credentials
-
-For testing purposes:
-- **Admin Login**
-  - Username: `admincasa`
-  - Password: `admin123`
-
-Remember to change these credentials in production!
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## 👥 Team
 
-- Mapbox for mapping services
-- Lucide for beautiful icons
-- The Luxembourg transportation community
+- Product Owner: [Your Name]
+- Lead Developer: [Your Name]
+- UI/UX Designer: [Your Name]
 
-## Support
+## 📞 Support
 
-For support, email support@luxembourgtaxi.com or join our Slack channel.
+For support, please email support@casadrives.com or join our [Discord community](https://discord.gg/casadrives).
