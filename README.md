@@ -1,148 +1,179 @@
-# CasaDrives 🚗
+# Pantera Ride-Sharing Application
 
-A modern ride-sharing platform built with React, TypeScript, and Mapbox.
+A modern, secure, and scalable ride-sharing platform built with React, TypeScript, and Node.js.
 
-## Features 🌟
+## Features
 
-- Real-time ride tracking with WebSocket
-- Interactive map interface using Mapbox
-- Toast notifications for ride updates
-- PWA support for mobile installation
-- Responsive design for all devices
-- WebSocket-based real-time updates
-- Modern UI with Tailwind CSS and Framer Motion
+- 🚗 Real-time ride tracking and matching
+- 👤 Multi-role user system (Riders, Drivers, Companies, Admins)
+- 💳 Secure payment processing
+- 📱 Responsive web design
+- 🔒 Advanced security features
+- 📊 Comprehensive admin dashboard
+- 🗺️ Real-time location tracking
+- ⭐ Rating and review system
 
-## Tech Stack 💻
+## Tech Stack
 
 - **Frontend:**
-  - React 18 with TypeScript
-  - Vite for fast development
-  - TailwindCSS for styling
-  - Framer Motion for animations
-  - React Query for data fetching
-  - Zustand for state management
-  - Mapbox GL for maps
+  - React 18
+  - TypeScript
+  - Tailwind CSS
+  - Redux Toolkit
+  - React Router 6
 
 - **Backend:**
-  - Express.js server
-  - WebSocket for real-time communication
-  - CORS support
-  - Mock API endpoints
+  - Node.js
+  - Express.js
+  - PostgreSQL with PostGIS
+  - TypeORM
+  - JWT Authentication
 
-## Prerequisites 📋
+- **DevOps:**
+  - Docker
+  - GitHub Actions
+  - AWS/Digital Ocean
+  - Nginx
 
-- Node.js 18+ and npm
-- Mapbox API key
-- Modern web browser
-- VS Code with recommended extensions
+## Getting Started
 
-## Getting Started 🚀
+### Prerequisites
 
-1. **Clone the repository:**
-   ```bash
-   git clone [repository-url]
-   cd casadrives
-   ```
+- Node.js 18+
+- PostgreSQL 15+ with PostGIS
+- npm or yarn
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### Installation
 
-3. **Set up environment variables:**
-   - Copy `.env.example` to `.env`
-   - Update the Mapbox token and other configurations
-
-4. **Start development servers:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser:**
-   - Frontend: http://localhost:3000
-   - Backend: http://localhost:3001
-
-## Development 🛠️
-
-### VS Code Setup
-
-1. Install recommended extensions:
-   - ESLint
-   - Prettier
-   - Tailwind CSS IntelliSense
-   - And more (see `.vscode/extensions.json`)
-
-2. Enable format on save:
-   - Already configured in `.vscode/settings.json`
-   - Uses Prettier for formatting
-   - ESLint for code quality
-
-### Available Scripts
-
-- `npm run dev` - Start development servers (frontend + backend)
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Lint code
-- `npm run server` - Run backend server only
-
-### Project Structure
-
-```
-casadrives/
-├── src/                    # Frontend source code
-│   ├── components/         # React components
-│   ├── hooks/             # Custom React hooks
-│   ├── services/          # API services
-│   ├── types/             # TypeScript types
-│   └── utils/             # Utility functions
-├── server.js              # Backend server
-├── public/                # Static assets
-└── scripts/               # Build scripts
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/pantera.git
+cd pantera
 ```
 
-## Features in Detail 📝
+2. Install dependencies:
+```bash
+npm install
+```
 
-### Ride Booking Flow
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
 
-1. User enters pickup and destination
-2. System finds nearby drivers
-3. Real-time driver location tracking
-4. Live ETA updates
-5. Ride status notifications
+4. Set up the database:
+```bash
+# Create database
+createdb pantera_db
 
-### Real-time Updates
+# Run migrations
+npm run migrate
+```
 
-- WebSocket connection for live updates
-- Automatic reconnection
-- Efficient data synchronization
-- Status change notifications
+5. Start the development server:
+```bash
+npm run dev
+```
 
-### Map Integration
+### Database Setup
 
-- Interactive Mapbox maps
-- Real-time location tracking
-- Route visualization
-- Custom markers and overlays
+1. Install PostgreSQL and PostGIS:
+```bash
+# Windows (using Chocolatey)
+choco install postgresql
+choco install postgis
+```
 
-## Contributing 🤝
+2. Create the database:
+```sql
+CREATE DATABASE pantera_db;
+```
+
+3. Run migrations:
+```bash
+npm run migrate
+```
+
+## Development
+
+### Branch Strategy
+
+- `main`: Production-ready code
+- `develop`: Development branch
+- `feature/*`: New features
+- `bugfix/*`: Bug fixes
+- `release/*`: Release preparation
+
+### Testing
+
+```bash
+# Run unit tests
+npm test
+
+# Run e2e tests
+npm run test:e2e
+
+# Run with coverage
+npm run test:coverage
+```
+
+### Building
+
+```bash
+# Production build
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Deployment
+
+The application uses GitHub Actions for CI/CD:
+
+1. Push to `develop` branch:
+   - Runs tests
+   - Builds application
+   - Deploys to staging
+
+2. Push to `main` branch:
+   - Runs tests
+   - Builds application
+   - Deploys to production
+
+## Security
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- Rate limiting
+- SQL injection protection
+- XSS protection
+- CSRF protection
+- Security headers
+- Input validation
+- Output sanitization
+
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License 📄
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments 🙏
+## Support
 
-- Mapbox for mapping services
-- React team for the awesome framework
-- Tailwind CSS for the utility-first CSS framework
-- All contributors and supporters
+For support, email support@pantera.com or join our Slack channel.
 
----
+## Acknowledgments
 
-Made with ❤️ by the CasaDrives team
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [PostGIS](https://postgis.net/)
+- [Tailwind CSS](https://tailwindcss.com/)

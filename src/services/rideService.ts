@@ -34,38 +34,93 @@ export interface Ride {
 
 class RideService {
   private activeSubscriptions: Map<string, () => void> = new Map();
+  private maxRetries = 3;
+  private retryDelay = 1000;
+
+  private async retryOperation<T>(operation: () => Promise<T>): Promise<T> {
+    let lastError: any;
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error: any) {
+        lastError = error;
+        if (attempt === this.maxRetries) break;
+        
+        console.log(`Attempt ${attempt} failed, retrying in ${this.retryDelay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay * attempt));
+      }
+    }
+    throw lastError;
+  }
+
+  private handleError(error: any, context: string): never {
+    console.error(`${context} error:`, error);
+    throw {
+      message: error.response?.data?.message || `Failed to ${context.toLowerCase()}. Please try again.`,
+      status: error.response?.status || 500,
+      errors: error.response?.data?.errors
+    };
+  }
 
   async requestRide(request: RideRequest): Promise<Ride> {
-    const response = await api.post('/rides', request);
-    return response.data;
+    try {
+      return await this.retryOperation(async () => {
+        const response = await api.post('/rides', request);
+        return response.data;
+      });
+    } catch (error) {
+      this.handleError(error, 'Request ride');
+    }
   }
 
   async cancelRide(rideId: string): Promise<void> {
-    await api.post(`/rides/${rideId}/cancel`);
-    this.unsubscribeFromRideUpdates(rideId);
+    try {
+      await this.retryOperation(async () => {
+        await api.post(`/rides/${rideId}/cancel`);
+      });
+      this.unsubscribeFromRideUpdates(rideId);
+    } catch (error) {
+      this.handleError(error, 'Cancel ride');
+    }
   }
 
   async getRideStatus(rideId: string): Promise<Ride> {
-    const response = await api.get(`/rides/${rideId}`);
-    return response.data;
+    try {
+      return await this.retryOperation(async () => {
+        const response = await api.get(`/rides/${rideId}`);
+        return response.data;
+      });
+    } catch (error) {
+      this.handleError(error, 'Get ride status');
+    }
   }
 
   subscribeToRideUpdates(rideId: string, onUpdate: (ride: Ride) => void): () => void {
-    // Unsubscribe from any existing subscription for this ride
     this.unsubscribeFromRideUpdates(rideId);
 
-    // Connect WebSocket if not already connected
-    wsService.connect();
+    const handleError = (error: any) => {
+      console.error('Ride update subscription error:', error);
+      onUpdate({ ...error, status: 'error' } as Ride);
+    };
 
-    // Subscribe to ride updates
-    const unsubscribe = wsService.subscribe<Ride>(`ride:${rideId}`, (ride) => {
-      onUpdate(ride);
-    });
+    try {
+      wsService.connect();
+      const unsubscribe = wsService.subscribe<Ride>(`ride:${rideId}`, 
+        (ride) => {
+          try {
+            onUpdate(ride);
+          } catch (error) {
+            handleError(error);
+          }
+        }
+      );
 
-    // Store the unsubscribe function
-    this.activeSubscriptions.set(rideId, unsubscribe);
-
-    return () => this.unsubscribeFromRideUpdates(rideId);
+      this.activeSubscriptions.set(rideId, unsubscribe);
+      return () => this.unsubscribeFromRideUpdates(rideId);
+    } catch (error) {
+      handleError(error);
+      return () => {};
+    }
   }
 
   private unsubscribeFromRideUpdates(rideId: string): void {
@@ -77,13 +132,24 @@ class RideService {
   }
 
   async getDriverLocation(driverId: string): Promise<{ coordinates: [number, number]; heading: number }> {
-    const response = await api.get(`/drivers/${driverId}/location`);
-    return response.data;
+    try {
+      return await this.retryOperation(async () => {
+        const response = await api.get(`/drivers/${driverId}/location`);
+        return response.data;
+      });
+    } catch (error) {
+      this.handleError(error, 'Get driver location');
+    }
   }
 
   subscribeToDriverLocation(driverId: string, onUpdate: (location: { coordinates: [number, number]; heading: number }) => void): () => void {
-    wsService.connect();
-    return wsService.subscribe<{ coordinates: [number, number]; heading: number }>(`driver:${driverId}:location`, onUpdate);
+    try {
+      wsService.connect();
+      return wsService.subscribe<{ coordinates: [number, number]; heading: number }>(`driver:${driverId}:location`, onUpdate);
+    } catch (error) {
+      console.error('Driver location subscription error:', error);
+      return () => {};
+    }
   }
 }
 

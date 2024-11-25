@@ -18,6 +18,9 @@ class WebSocketService {
   private onOpenCallback?: () => void;
   private onCloseCallback?: () => void;
   private onErrorCallback?: (error: Event) => void;
+  private heartbeatInterval: number = 30000; // 30 seconds
+  private heartbeatTimer?: NodeJS.Timeout;
+  private lastHeartbeat: number = 0;
 
   constructor(options: WebSocketOptions = {}) {
     this.reconnectAttempts = options.reconnectAttempts || Number(import.meta.env.VITE_WEBSOCKET_RECONNECT_ATTEMPTS) || 5;
@@ -33,44 +36,35 @@ class WebSocketService {
     return wsUrl;
   }
 
-  connect(): void {
-    if (this.ws?.readyState === WebSocket.OPEN || this.isConnecting) return;
-
-    this.isConnecting = true;
-    const wsUrl = this.getWebSocketUrl();
-    this.ws = new WebSocket(wsUrl);
-
-    this.ws.onopen = () => {
-      console.log('WebSocket connected');
-      this.isConnecting = false;
-      this.reconnectCount = 0;
-      this.onOpenCallback?.();
-    };
-
-    this.ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      this.isConnecting = false;
-      this.onCloseCallback?.();
-      this.attemptReconnect();
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      this.onErrorCallback?.(error);
-    };
-
-    this.ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        const { type, payload } = data;
-        const handler = this.messageHandlers.get(type);
-        if (handler) {
-          handler(payload);
+  private startHeartbeat() {
+    this.stopHeartbeat();
+    this.heartbeatTimer = setInterval(() => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.send('heartbeat', { timestamp: Date.now() });
+        
+        // Check if we haven't received a heartbeat response in too long
+        const now = Date.now();
+        if (this.lastHeartbeat && now - this.lastHeartbeat > this.heartbeatInterval * 2) {
+          console.warn('No heartbeat received, reconnecting...');
+          this.reconnect();
         }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
       }
-    };
+    }, this.heartbeatInterval);
+  }
+
+  private stopHeartbeat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = undefined;
+    }
+  }
+
+  private reconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+    this.connect();
   }
 
   private attemptReconnect(): void {
@@ -87,6 +81,54 @@ class WebSocketService {
     }, this.reconnectInterval);
   }
 
+  connect(): void {
+    if (this.ws?.readyState === WebSocket.OPEN || this.isConnecting) return;
+
+    this.isConnecting = true;
+    const wsUrl = this.getWebSocketUrl();
+    this.ws = new WebSocket(wsUrl);
+
+    this.ws.onopen = () => {
+      console.log('WebSocket connected');
+      this.isConnecting = false;
+      this.reconnectCount = 0;
+      this.startHeartbeat();
+      this.onOpenCallback?.();
+    };
+
+    this.ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      this.isConnecting = false;
+      this.stopHeartbeat();
+      this.onCloseCallback?.();
+      this.attemptReconnect();
+    };
+
+    this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      this.onErrorCallback?.(error);
+    };
+
+    this.ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        const { type, payload } = data;
+        
+        if (type === 'heartbeat') {
+          this.lastHeartbeat = Date.now();
+          return;
+        }
+
+        const handler = this.messageHandlers.get(type);
+        if (handler) {
+          handler(payload);
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+  }
+
   subscribe<T>(type: string, handler: (data: T) => void): () => void {
     this.messageHandlers.set(type, handler);
     return () => this.messageHandlers.delete(type);
@@ -101,10 +143,13 @@ class WebSocketService {
   }
 
   disconnect(): void {
+    this.stopHeartbeat();
     if (this.ws) {
       this.ws.close();
       this.ws = null;
     }
+    this.messageHandlers.clear();
+    this.reconnectCount = 0;
   }
 }
 
