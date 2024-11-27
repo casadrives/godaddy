@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuthStore } from '@/services/authService';
+import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

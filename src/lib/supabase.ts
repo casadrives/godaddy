@@ -1,19 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
 
+// Debug: Log environment loading
+console.log('Environment:', {
+  mode: import.meta.env.MODE,
+  dev: import.meta.env.DEV,
+  prod: import.meta.env.PROD
+});
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl) throw new Error('Missing VITE_SUPABASE_URL');
-if (!supabaseAnonKey) throw new Error('Missing VITE_SUPABASE_ANON_KEY');
+// Debug: Log raw environment variables
+console.log('Supabase Configuration:', {
+  url: supabaseUrl,
+  keyPrefix: supabaseAnonKey?.substring(0, 8),
+  keyLength: supabaseAnonKey?.length,
+  fullKey: supabaseAnonKey // Temporarily log full key for debugging
+});
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+if (!supabaseUrl || supabaseUrl === 'undefined') {
+  throw new Error('Invalid VITE_SUPABASE_URL: ' + supabaseUrl);
+}
+if (!supabaseAnonKey || supabaseAnonKey === 'undefined') {
+  throw new Error('Invalid VITE_SUPABASE_ANON_KEY: ' + supabaseAnonKey);
+}
+
+// Create Supabase client with explicit configuration
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
+    detectSessionInUrl: true
   }
+});
+
+// Verify client configuration
+console.log('Supabase Client:', {
+  hasAuth: !!supabase.auth,
+  hasStorage: !!supabase.storage,
+  hasFrom: !!supabase.from
 });
 
 export const uploadFile = async (bucket: string, path: string, file: File) => {

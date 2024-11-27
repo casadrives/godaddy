@@ -23,7 +23,7 @@ import { taxiCompanyService } from '@/services/taxiCompanyService';
 import { TaxiCompanyForm } from './TaxiCompanyForm';
 import { TaxiCompanyAnalytics } from './TaxiCompanyAnalytics';
 import { LoginForm } from '../auth/LoginForm';
-import { useAuthStore } from '@/services/authService';
+import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import {
   ChartBarIcon,

@@ -8,7 +8,7 @@ import { PricingManagement } from '../pricing/PricingManagement';
 import { Promotions } from './Promotions';
 import { SignupRequests } from './SignupRequests';
 import { Card } from '@/components/ui/card';
-import { useAuthStore } from '@/services/authService';
+import { useAuthStore } from '@/stores/authStore';
 import { LoginForm } from '../auth/LoginForm';
 import { DriverManagement } from '../drivers/DriverManagement';
 
