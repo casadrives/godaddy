@@ -40,7 +40,9 @@ class AdminAuthService {
   }
 
   public async login(username: string, password: string): Promise<boolean> {
+    console.log(`Attempting login with username: ${username}`);
     if (username === this.adminCredentials.username && bcrypt.compareSync(password, this.adminCredentials.passwordHash)) {
+      console.log(`Password hash comparison result: ${bcrypt.compareSync(password, this.adminCredentials.passwordHash)}`);
       const adminUser: AdminUser = {
         username,
         role: 'admin',
