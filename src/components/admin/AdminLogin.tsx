@@ -18,7 +18,7 @@ export function AdminLogin() {
       await adminAuthService.login(username, password);
       // Successful login will trigger a redirect in the parent component
     } catch (err) {
-      setError('Invalid username or password');
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

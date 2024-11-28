@@ -36,7 +36,7 @@ export function BookRide() {
         }
       } catch (error) {
         console.error('Error getting address:', error);
-        setError('Failed to get current location address');
+        setError('Failed to get current location address. Please check your network connection or try again later.');
       }
     }
   };

@@ -44,7 +44,7 @@ export interface ActiveRide {
   driver: Driver;
   pickup: Location;
   dropoff: Location;
-  status: 'accepted' | 'arriving' | 'picked_up' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'accepted' | 'arriving' | 'picked_up' | 'in_progress' | 'completed' | 'cancelled' | 'scheduled';
   estimatedTime: number;
   distance: number;
   price: number;
@@ -199,6 +199,20 @@ class RideService {
     // In a real app, this would fetch from an API
     await new Promise(resolve => setTimeout(resolve, 1000));
     return this.rideHistory;
+  }
+
+  public async scheduleRide(request: RideRequest): Promise<ActiveRide> {
+    const scheduledRide = {
+      ...request,
+      id: `ride-${Date.now()}`,
+      status: 'scheduled',
+      estimatedTime: 0,
+      distance: 0,
+      price: 0,
+      driver: null,
+    };
+    this.rideHistorySubject.next([...this.rideHistorySubject.value, scheduledRide]);
+    return scheduledRide;
   }
 }
 

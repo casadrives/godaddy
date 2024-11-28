@@ -8,11 +8,14 @@ import tsParser from '@typescript-eslint/parser';
 export default [
   {
     ignores: ['dist'],
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: Object.fromEntries(
+        Object.entries(globals.browser).map(([key, value]) => [key.trim(), value])
+      ),
       parser: tsParser,
+      sourceType: 'module',
     },
     plugins: {
       'react-hooks': reactHooks,
@@ -20,15 +23,18 @@ export default [
       '@typescript-eslint': tseslint,
     },
     rules: {
+      ...js.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
     },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
   },
-  js.configs.recommended,
-  tseslint.configs.recommended,
-  'plugin:@typescript-eslint/recommended',
-  'plugin:react-hooks/recommended',
 ];

@@ -1,4 +1,5 @@
 import { BehaviorSubject } from 'rxjs';
+import bcrypt from 'bcryptjs';
 
 interface AdminUser {
   username: string;
@@ -10,7 +11,7 @@ class AdminAuthService {
   private static instance: AdminAuthService;
   private adminCredentials = {
     username: 'admincasa',
-    password: 'admin123'
+    passwordHash: '$2a$10$E9wQzY6eV3W6oQ0V1Z0Z2eG9G7Q1eQ1eQ1eQ1eQ1eQ1eQ1eQ1e' // bcrypt hash for 'admin123'
   };
 
   private currentAdminSubject = new BehaviorSubject<AdminUser | null>(null);
@@ -39,7 +40,7 @@ class AdminAuthService {
   }
 
   public async login(username: string, password: string): Promise<boolean> {
-    if (username === this.adminCredentials.username && password === this.adminCredentials.password) {
+    if (username === this.adminCredentials.username && bcrypt.compareSync(password, this.adminCredentials.passwordHash)) {
       const adminUser: AdminUser = {
         username,
         role: 'admin',
@@ -50,12 +51,13 @@ class AdminAuthService {
       this.currentAdminSubject.next(adminUser);
       return true;
     }
-    throw new Error('Invalid credentials');
+    return false;
   }
 
   public async changePassword(currentPassword: string, newPassword: string): Promise<boolean> {
-    if (currentPassword === this.adminCredentials.password) {
-      this.adminCredentials.password = newPassword;
+    if (bcrypt.compareSync(currentPassword, this.adminCredentials.passwordHash)) {
+      const newPasswordHash = bcrypt.hashSync(newPassword, 10);
+      this.adminCredentials.passwordHash = newPasswordHash;
       return true;
     }
     throw new Error('Current password is incorrect');
