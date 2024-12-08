@@ -1,7 +1,11 @@
+import { supabase } from '@/lib/supabase';
+import { Database } from '@/types/supabase';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { gpsService, Location } from './gpsService';
 import { config } from '../config/production';
 import { logError, logEvent } from '../utils/monitoring';
+
+type DriverLocation = Database['public']['Tables']['driver_locations']['Row'];
 
 interface TrackingState {
   isTracking: boolean;
@@ -105,4 +109,140 @@ class DriverTrackingService {
   }
 }
 
-export const driverTrackingService = new DriverTrackingService();
+export const driverTrackingService = {
+  ...new DriverTrackingService(),
+  // Update driver location
+  async updateLocation(driverId: string, latitude: number, longitude: number) {
+    try {
+      const { data, error } = await supabase
+        .from('driver_locations')
+        .upsert({
+          driver_id: driverId,
+          latitude,
+          longitude,
+          last_updated: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update location error:', error);
+      throw error;
+    }
+  },
+
+  // Get driver's current location
+  async getDriverLocation(driverId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('driver_locations')
+        .select('*')
+        .eq('driver_id', driverId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Get driver location error:', error);
+      throw error;
+    }
+  },
+
+  // Subscribe to driver location updates
+  subscribeToLocationUpdates(driverId: string, callback: (location: DriverLocation) => void) {
+    return supabase
+      .channel(`driver-location-${driverId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'driver_locations',
+          filter: `driver_id=eq.${driverId}`
+        },
+        (payload) => {
+          callback(payload.new as DriverLocation);
+        }
+      )
+      .subscribe();
+  },
+
+  // Get nearby drivers
+  async getNearbyDrivers(latitude: number, longitude: number, radiusKm: number = 5) {
+    try {
+      // Using PostGIS to calculate nearby drivers
+      const { data, error } = await supabase.rpc('get_nearby_drivers', {
+        p_latitude: latitude,
+        p_longitude: longitude,
+        p_radius_km: radiusKm
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Get nearby drivers error:', error);
+      throw error;
+    }
+  },
+
+  // Start driver shift
+  async startShift(driverId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('driver_shifts')
+        .insert({
+          driver_id: driverId,
+          start_time: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Start shift error:', error);
+      throw error;
+    }
+  },
+
+  // End driver shift
+  async endShift(driverId: string, shiftId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('driver_shifts')
+        .update({
+          end_time: new Date().toISOString()
+        })
+        .eq('id', shiftId)
+        .eq('driver_id', driverId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('End shift error:', error);
+      throw error;
+    }
+  },
+
+  // Get driver's current shift
+  async getCurrentShift(driverId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('driver_shifts')
+        .select('*')
+        .eq('driver_id', driverId)
+        .is('end_time', null)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Get current shift error:', error);
+      throw error;
+    }
+  }
+};

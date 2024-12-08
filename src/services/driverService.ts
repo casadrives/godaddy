@@ -1,126 +1,245 @@
-import { create } from 'zustand';
-import { v4 as uuidv4 } from 'uuid';
-import { faker } from '@faker-js/faker';
+import { supabase } from '@/lib/supabase';
+import { Database } from '@/types/supabase';
 
-export interface Driver {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  licenseNumber: string;
-  rating: number;
-  status: 'active' | 'inactive' | 'suspended';
-  vehicle: {
-    make: string;
-    model: string;
-    year: number;
-    licensePlate: string;
-    type: 'economy' | 'comfort' | 'luxury';
-    color: string;
-  };
-  totalTrips: number;
-  totalEarnings: number;
-  joiningDate: Date;
-  lastActive: Date;
-  documentsVerified: boolean;
-  address: string;
-  profileImage?: string;
-}
+type Driver = Database['public']['Tables']['drivers']['Row'];
+type Vehicle = Database['public']['Tables']['vehicles']['Row'];
 
-interface DriverState {
-  drivers: Driver[];
-  addDriver: (driver: Omit<Driver, 'id'>) => void;
-  updateDriver: (id: string, updates: Partial<Driver>) => void;
-  deleteDriver: (id: string) => void;
-  generateMockDrivers: (count: number) => void;
-}
+export const driverService = {
+  // Get driver profile
+  async getDriverProfile(driverId: string) {
+    try {
+      const { data: driver, error } = await supabase
+        .from('drivers')
+        .select(`
+          *,
+          vehicles (*),
+          users!inner (*),
+          companies (*)
+        `)
+        .eq('id', driverId)
+        .single();
 
-// List of economy cars for random assignment
-const economyCars = [
-  { make: 'Toyota', model: 'Corolla', years: [2018, 2019, 2020, 2021, 2022] },
-  { make: 'Honda', model: 'Civic', years: [2018, 2019, 2020, 2021, 2022] },
-  { make: 'Volkswagen', model: 'Golf', years: [2018, 2019, 2020, 2021, 2022] },
-  { make: 'Hyundai', model: 'i30', years: [2018, 2019, 2020, 2021, 2022] },
-  { make: 'Skoda', model: 'Octavia', years: [2018, 2019, 2020, 2021, 2022] },
-  { make: 'Peugeot', model: '308', years: [2018, 2019, 2020, 2021, 2022] },
-  { make: 'Renault', model: 'Megane', years: [2018, 2019, 2020, 2021, 2022] },
-];
-
-const colors = ['Black', 'White', 'Silver', 'Gray', 'Blue', 'Red'];
-
-// Luxembourg phone number format
-const generateLuxembourgPhone = () => {
-  return `+352 ${faker.number.int({ min: 621, max: 699 })} ${faker.number.int({ min: 100, max: 999 })}`;
-};
-
-// Luxembourg license plate format (XX1234)
-const generateLuxembourgLicensePlate = () => {
-  const letters = faker.string.alpha({ length: 2, casing: 'upper' });
-  const numbers = faker.number.int({ min: 1000, max: 9999 });
-  return `${letters}${numbers}`;
-};
-
-// Luxembourg driver's license format (12345678)
-const generateLuxembourgDriverLicense = () => {
-  return faker.number.int({ min: 10000000, max: 99999999 }).toString();
-};
-
-export const useDriverStore = create<DriverState>((set) => ({
-  drivers: [],
-  addDriver: (driver) => {
-    set((state) => ({
-      drivers: [...state.drivers, { ...driver, id: uuidv4() }],
-    }));
+      if (error) throw error;
+      return driver;
+    } catch (error) {
+      console.error('Get driver profile error:', error);
+      throw error;
+    }
   },
-  updateDriver: (id, updates) => {
-    set((state) => ({
-      drivers: state.drivers.map((driver) =>
-        driver.id === id ? { ...driver, ...updates } : driver
-      ),
-    }));
+
+  // Update driver profile
+  async updateDriverProfile(driverId: string, updates: Partial<Driver>) {
+    try {
+      const { data, error } = await supabase
+        .from('drivers')
+        .update(updates)
+        .eq('id', driverId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update driver profile error:', error);
+      throw error;
+    }
   },
-  deleteDriver: (id) => {
-    set((state) => ({
-      drivers: state.drivers.filter((driver) => driver.id !== id),
-    }));
+
+  // Update driver status (online/offline)
+  async updateDriverStatus(driverId: string, isOnline: boolean) {
+    try {
+      const { data, error } = await supabase
+        .from('drivers')
+        .update({
+          is_online: isOnline,
+          last_online: new Date().toISOString()
+        })
+        .eq('id', driverId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update driver status error:', error);
+      throw error;
+    }
   },
-  generateMockDrivers: (count) => {
-    const mockDrivers: Driver[] = Array.from({ length: count }, () => {
-      const randomCar = faker.helpers.arrayElement(economyCars);
-      const randomYear = faker.helpers.arrayElement(randomCar.years);
-      const joiningDate = faker.date.past({ years: 3 });
-      const totalTrips = faker.number.int({ min: 100, max: 5000 });
-      
+
+  // Get driver's vehicles
+  async getDriverVehicles(driverId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('driver_id', driverId);
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Get driver vehicles error:', error);
+      throw error;
+    }
+  },
+
+  // Add vehicle to driver
+  async addVehicle(driverId: string, vehicleData: Partial<Vehicle>) {
+    try {
+      const { data, error } = await supabase
+        .from('vehicles')
+        .insert({
+          ...vehicleData,
+          driver_id: driverId
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Add vehicle error:', error);
+      throw error;
+    }
+  },
+
+  // Update vehicle
+  async updateVehicle(vehicleId: string, updates: Partial<Vehicle>) {
+    try {
+      const { data, error } = await supabase
+        .from('vehicles')
+        .update(updates)
+        .eq('id', vehicleId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update vehicle error:', error);
+      throw error;
+    }
+  },
+
+  // Get driver's earnings
+  async getDriverEarnings(driverId: string, startDate: string, endDate: string) {
+    try {
+      const { data, error } = await supabase
+        .from('rides')
+        .select('fare, driver_earnings, created_at')
+        .eq('driver_id', driverId)
+        .gte('created_at', startDate)
+        .lte('created_at', endDate);
+
+      if (error) throw error;
+
+      const totalEarnings = data.reduce((sum, ride) => sum + (ride.driver_earnings || 0), 0);
+      const totalRides = data.length;
+
       return {
-        id: uuidv4(),
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-        email: faker.internet.email(),
-        phone: generateLuxembourgPhone(),
-        licenseNumber: generateLuxembourgDriverLicense(),
-        rating: faker.number.float({ min: 4.0, max: 5.0, precision: 0.1 }),
-        status: faker.helpers.arrayElement(['active', 'inactive', 'suspended']),
-        vehicle: {
-          make: randomCar.make,
-          model: randomCar.model,
-          year: randomYear,
-          licensePlate: generateLuxembourgLicensePlate(),
-          type: 'economy',
-          color: faker.helpers.arrayElement(colors),
-        },
-        totalTrips,
-        totalEarnings: totalTrips * faker.number.float({ min: 15, max: 25 }),
-        joiningDate,
-        lastActive: faker.date.recent(),
-        documentsVerified: faker.datatype.boolean(),
-        address: faker.location.streetAddress({ useFullAddress: true }),
-        profileImage: faker.image.avatar(),
+        earnings: totalEarnings,
+        rides: totalRides,
+        details: data
       };
-    });
-
-    set((state) => ({
-      drivers: [...state.drivers, ...mockDrivers],
-    }));
+    } catch (error) {
+      console.error('Get driver earnings error:', error);
+      throw error;
+    }
   },
-}));
+
+  // Get driver's upcoming rides
+  async getUpcomingRides(driverId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('rides')
+        .select(`
+          *,
+          users!rides_user_id_fkey (name, phone),
+          locations!rides_pickup_location_fkey (*)
+        `)
+        .eq('driver_id', driverId)
+        .eq('status', 'scheduled')
+        .order('pickup_time', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Get upcoming rides error:', error);
+      throw error;
+    }
+  },
+
+  // Get driver's ride history
+  async getRideHistory(driverId: string, page = 1, limit = 10) {
+    try {
+      const start = (page - 1) * limit;
+      const end = start + limit - 1;
+
+      const { data, error, count } = await supabase
+        .from('rides')
+        .select(`
+          *,
+          users!rides_user_id_fkey (name),
+          locations!rides_pickup_location_fkey (*),
+          locations!rides_dropoff_location_fkey (*)
+        `, { count: 'exact' })
+        .eq('driver_id', driverId)
+        .order('created_at', { ascending: false })
+        .range(start, end);
+
+      if (error) throw error;
+
+      return {
+        rides: data,
+        total: count || 0,
+        page,
+        limit
+      };
+    } catch (error) {
+      console.error('Get ride history error:', error);
+      throw error;
+    }
+  },
+
+  // Update driver documents
+  async updateDriverDocuments(driverId: string, documents: {
+    license?: File,
+    insurance?: File,
+    registration?: File
+  }) {
+    try {
+      const uploads = [];
+      const updates: Record<string, string> = {};
+
+      for (const [key, file] of Object.entries(documents)) {
+        if (file) {
+          const path = `drivers/${driverId}/documents/${key}-${Date.now()}`;
+          const { error: uploadError } = await supabase.storage
+            .from('documents')
+            .upload(path, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('documents')
+            .getPublicUrl(path);
+
+          updates[`${key}_url`] = publicUrl;
+          uploads.push(path);
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('drivers')
+        .update(updates)
+        .eq('id', driverId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update driver documents error:', error);
+      throw error;
+    }
+  }
+};

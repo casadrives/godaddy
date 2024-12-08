@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
+import { adminAuthService } from './adminAuthService';
 
 type User = Database['public']['Tables']['users']['Row'];
 type Company = Database['public']['Tables']['companies']['Row'];
@@ -8,6 +9,192 @@ type Vehicle = Database['public']['Tables']['vehicles']['Row'];
 type Ride = Database['public']['Tables']['rides']['Row'];
 
 export const adminService = {
+  // Get dashboard statistics
+  async getDashboardStats() {
+    try {
+      const [
+        { count: usersCount, error: usersError },
+        { count: driversCount, error: driversError },
+        { count: companiesCount, error: companiesError },
+        { count: ridesCount, error: ridesError }
+      ] = await Promise.all([
+        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase.from('drivers').select('*', { count: 'exact', head: true }),
+        supabase.from('companies').select('*', { count: 'exact', head: true }),
+        supabase.from('rides').select('*', { count: 'exact', head: true })
+      ]);
+
+      if (usersError || driversError || companiesError || ridesError) {
+        throw new Error('Failed to fetch dashboard statistics');
+      }
+
+      return {
+        usersCount: usersCount || 0,
+        driversCount: driversCount || 0,
+        companiesCount: companiesCount || 0,
+        ridesCount: ridesCount || 0
+      };
+    } catch (error) {
+      console.error('Get dashboard stats error:', error);
+      throw error;
+    }
+  },
+
+  // Get all users with pagination
+  async getUsers(page = 1, limit = 10) {
+    try {
+      const start = (page - 1) * limit;
+      const end = start + limit - 1;
+
+      const { data, error, count } = await supabase
+        .from('users')
+        .select('*', { count: 'exact' })
+        .range(start, end);
+
+      if (error) throw error;
+
+      return {
+        users: data,
+        total: count || 0,
+        page,
+        limit
+      };
+    } catch (error) {
+      console.error('Get users error:', error);
+      throw error;
+    }
+  },
+
+  // Get all companies with pagination
+  async getCompanies(page = 1, limit = 10) {
+    try {
+      const start = (page - 1) * limit;
+      const end = start + limit - 1;
+
+      const { data, error, count } = await supabase
+        .from('companies')
+        .select('*', { count: 'exact' })
+        .range(start, end);
+
+      if (error) throw error;
+
+      return {
+        companies: data,
+        total: count || 0,
+        page,
+        limit
+      };
+    } catch (error) {
+      console.error('Get companies error:', error);
+      throw error;
+    }
+  },
+
+  // Get all drivers with pagination
+  async getDrivers(page = 1, limit = 10) {
+    try {
+      const start = (page - 1) * limit;
+      const end = start + limit - 1;
+
+      const { data, error, count } = await supabase
+        .from('drivers')
+        .select('*, companies(*)', { count: 'exact' })
+        .range(start, end);
+
+      if (error) throw error;
+
+      return {
+        drivers: data,
+        total: count || 0,
+        page,
+        limit
+      };
+    } catch (error) {
+      console.error('Get drivers error:', error);
+      throw error;
+    }
+  },
+
+  // Update user status
+  async updateUserStatus(userId: string, status: 'active' | 'suspended' | 'banned') {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update({ status })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update user status error:', error);
+      throw error;
+    }
+  },
+
+  // Update company status
+  async updateCompanyStatus(companyId: string, status: 'active' | 'suspended' | 'banned') {
+    try {
+      const { data, error } = await supabase
+        .from('companies')
+        .update({ status })
+        .eq('id', companyId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update company status error:', error);
+      throw error;
+    }
+  },
+
+  // Update driver status
+  async updateDriverStatus(driverId: string, status: 'active' | 'suspended' | 'banned') {
+    try {
+      const { data, error } = await supabase
+        .from('drivers')
+        .update({ status })
+        .eq('id', driverId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Update driver status error:', error);
+      throw error;
+    }
+  },
+
+  // Get system logs
+  async getSystemLogs(page = 1, limit = 50) {
+    try {
+      const start = (page - 1) * limit;
+      const end = start + limit - 1;
+
+      const { data, error, count } = await supabase
+        .from('system_logs')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(start, end);
+
+      if (error) throw error;
+
+      return {
+        logs: data,
+        total: count || 0,
+        page,
+        limit
+      };
+    } catch (error) {
+      console.error('Get system logs error:', error);
+      throw error;
+    }
+  },
+
   // User Management
   async getAllUsers() {
     const { data: users, error } = await supabase

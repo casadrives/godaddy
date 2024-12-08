@@ -1,78 +1,140 @@
-import { BehaviorSubject } from 'rxjs';
-import bcrypt from 'bcryptjs';
+import { supabase } from '@/lib/supabase';
+import { Database } from '@/types/supabase';
 
-interface AdminUser {
-  username: string;
-  role: 'admin';
-  lastLogin: Date;
-}
+type User = Database['public']['Tables']['users']['Row'];
 
-class AdminAuthService {
-  private static instance: AdminAuthService;
-  private adminCredentials = {
-    username: 'admincasa',
-    passwordHash: '$2a$10$E9wQzY6eV3W6oQ0V1Z0Z2eG9G7Q1eQ1eQ1eQ1eQ1eQ1eQ1eQ1e' // bcrypt hash for 'admin123'
-  };
+export const adminAuthService = {
+  // Verify admin status
+  async verifyAdminStatus(userId: string): Promise<boolean> {
+    try {
+      // Check user role
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', userId)
+        .single();
 
-  private currentAdminSubject = new BehaviorSubject<AdminUser | null>(null);
+      if (userError) {
+        console.error('Admin verification error:', userError);
+        return false;
+      }
 
-  private constructor() {
-    // Check if there's a stored admin session
-    const storedAdmin = localStorage.getItem('adminUser');
-    if (storedAdmin) {
-      this.currentAdminSubject.next(JSON.parse(storedAdmin));
-    }
-  }
+      if (userData?.role !== 'admin') {
+        return false;
+      }
 
-  public static getInstance(): AdminAuthService {
-    if (!AdminAuthService.instance) {
-      AdminAuthService.instance = new AdminAuthService();
-    }
-    return AdminAuthService.instance;
-  }
+      // Check admin permissions
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_permissions')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-  public get currentAdmin() {
-    return this.currentAdminSubject.value;
-  }
+      if (adminError) {
+        console.error('Admin permissions check error:', adminError);
+        return false;
+      }
 
-  public get currentAdminObservable() {
-    return this.currentAdminSubject.asObservable();
-  }
-
-  public async login(username: string, password: string): Promise<boolean> {
-    console.log(`Attempting login with username: ${username}`);
-    if (username === this.adminCredentials.username && bcrypt.compareSync(password, this.adminCredentials.passwordHash)) {
-      console.log(`Password hash comparison result: ${bcrypt.compareSync(password, this.adminCredentials.passwordHash)}`);
-      const adminUser: AdminUser = {
-        username,
-        role: 'admin',
-        lastLogin: new Date()
-      };
-      
-      localStorage.setItem('adminUser', JSON.stringify(adminUser));
-      this.currentAdminSubject.next(adminUser);
       return true;
+    } catch (error) {
+      console.error('Admin verification error:', error);
+      return false;
     }
-    return false;
-  }
+  },
 
-  public async changePassword(currentPassword: string, newPassword: string): Promise<boolean> {
-    if (bcrypt.compareSync(currentPassword, this.adminCredentials.passwordHash)) {
-      const newPasswordHash = bcrypt.hashSync(newPassword, 10);
-      this.adminCredentials.passwordHash = newPasswordHash;
-      return true;
+  // Get admin permissions
+  async getAdminPermissions(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('admin_permissions')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Get admin permissions error:', error);
+      throw error;
     }
-    throw new Error('Current password is incorrect');
-  }
+  },
 
-  public logout() {
-    localStorage.removeItem('adminUser');
-    this.currentAdminSubject.next(null);
-  }
+  // Update admin permissions
+  async updateAdminPermissions(userId: string, permissions: any) {
+    try {
+      const { data, error } = await supabase
+        .from('admin_permissions')
+        .upsert({
+          user_id: userId,
+          permissions,
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
 
-  public isAuthenticated(): boolean {
-    return !!this.currentAdminSubject.value;
-  }
-}
+      if (error) {
+        throw error;
+      }
 
-export const adminAuthService = AdminAuthService.getInstance();
+      return data;
+    } catch (error) {
+      console.error('Update admin permissions error:', error);
+      throw error;
+    }
+  },
+
+  // Create admin user
+  async createAdminUser(email: string, password: string, name: string) {
+    try {
+      // Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            role: 'admin',
+            name
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('No user returned from auth');
+
+      // Create user record
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          email,
+          name,
+          role: 'admin',
+          status: 'approved',
+          email_verified: true
+        })
+        .select()
+        .single();
+
+      if (userError) throw userError;
+
+      // Create admin permissions
+      const { error: permError } = await supabase
+        .from('admin_permissions')
+        .insert({
+          user_id: authData.user.id,
+          permissions: {},
+          is_super_admin: false
+        });
+
+      if (permError) throw permError;
+
+      return userData;
+    } catch (error) {
+      console.error('Create admin user error:', error);
+      throw error;
+    }
+  }
+};
